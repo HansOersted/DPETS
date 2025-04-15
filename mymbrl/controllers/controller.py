@@ -45,12 +45,24 @@ class Controller:
         costs = torch.zeros(nopt, npart, device=self.config.device)
         if solution and plt_info:
             stds = np.zeros(cur_obs.shape[-1])
+        
+        T = self.config.agent.predict_length
+        weighting_type = self.config.agent.get("time_weighting", "uniform")
+        lam = self.config.agent.get("time_weighting_lambda", 5.0)
+
+        if weighting_type == "exp_increasing":
+            time_weights = [math.exp(-lam * (T - 1 - t) / (T - 1)) for t in range(T)]
+        elif weighting_type == "exp_decreasing":
+            time_weights = [math.exp(-lam * t / (T - 1)) for t in range(T)]
+        else:  # uniform
+            time_weights = [1.0] * T
+
         for t in range(self.config.agent.predict_length):
             cur_acs = ac_seqs[t]
             next_obs = self.prediction(cur_obs, cur_acs, t, sample_epoch, print_info=solution)
             cost = self.env.obs_cost_fn_cost(next_obs) + self.env.ac_cost_fn_cost(cur_acs.reshape(-1, cur_acs.shape[-1]))
             cost = cost.view(-1, npart)
-            costs += cost
+            costs += time_weights[t] * cost
             cur_obs = next_obs
             # 记录预测值
             if solution and t == 0:
