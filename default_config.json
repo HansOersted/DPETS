@@ -20,6 +20,9 @@
         "dynamics_hidden_size": 200,
         "dropout": 0.05,
         "dropout_mask_nums": 6,
+        "_time_weighting_choices": ["uniform", "exp_increasing", "exp_decreasing"],
+        "time_weighting": "uniform",
+        "time_weighting_lambda": 0.1,
         "MPC": {
             "reward_var": false,
             "done": false,

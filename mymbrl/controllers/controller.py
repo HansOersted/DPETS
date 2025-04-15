@@ -48,7 +48,7 @@ class Controller:
         
         T = self.config.agent.predict_length
         weighting_type = self.config.agent.get("time_weighting", "uniform")
-        lam = self.config.agent.get("time_weighting_lambda", 5.0)
+        lam = self.config.agent.get("time_weighting_lambda", 0.0)
 
         if weighting_type == "exp_increasing":
             time_weights = [math.exp(-lam * (T - 1 - t) / (T - 1)) for t in range(T)]
